@@ -1,225 +1,238 @@
-package ru.sber.poirot.focus.shared.records.dao
+Изменения в логике АПИ /focus-monitoring/api/upload/uploadByInn:
+сохранять новые поля из запроса в БД:
 
+focus_monitoring.focus_monitoring_record.sla_by_default_in_minutes	
+Берем из запроса АПИ UploadRequest.slaByDefault 
+Находим соответствующую запись из справочника re_dictionaries.monitoring_sla_by_default по id = UploadRequest.slaByDefault И process_name = <UploadRequest.processType, преобразованное в имя>
+Используем re_dictionaries.monitoring_sla_by_default.duration_in_minutes
+focus_monitoring.focus_monitoring_record.initiator_сomment	из запроса АПИ UploadRequest.initiatorComment
+доработать блокировку на создание на задач-дубликатов:
+сейчас так: проверяются только задачи до статуса согласовано (код 7), задачей-дубликатом является 1 ИНН.
+Т.е. максимум можно завести 1 задачу на 1 ИНН
+надо так: проверяются только задачи до статуса согласовано (код 7), задачей-дубликатом является 1 ИНН И принадлежность процесса задачи к мониторингу default_process_type.monitoring_process. 
+Т.е. максимум можно завести 2 задачи на 1 ИНН: одну с monitoring_process = false (старый ФМ), одну с monitoring_process = true.
+package ru.sber.poirot.focus.upload.manual
+
+import org.springframework.http.codec.multipart.FilePart
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.annotation.*
+import ru.sber.permissions.focus.HAS_INITIATION_FOCUS_MONITORING
+import ru.sber.poirot.audit.AuditClient
+
+@RestController
+@RequestMapping("api/upload")
+class UploadController(
+    private val auditClient: AuditClient,
+    private val uploader: Uploader,
+) {
+    @PostMapping("/verifyEGRULByInn")
+    @PreAuthorize(HAS_INITIATION_FOCUS_MONITORING)
+    suspend fun verifyEgrulByInn(@RequestBody request: UploadRequest): VerifyEgrulStatus =
+        auditClient.audit(event = "FOCUS_VERIFY_EGRUL_BY_INN", details = "request: $request") {
+            return@audit uploader.verifyEgrulByInn(request)
+        }
+
+    @PostMapping("/verifyDefaultByInn")
+    @PreAuthorize(HAS_INITIATION_FOCUS_MONITORING)
+    suspend fun verifyDefaultByInn(@RequestBody request: UploadRequest): VerifyDefaultStatus =
+        auditClient.audit(event = "FOCUS_VERIFY_UPLOAD_BY_INN", details = "request: $request") {
+            return@audit uploader.verifyDefaultByInn(request)
+        }
+
+    @PostMapping("/uploadByInn")
+    @PreAuthorize(HAS_INITIATION_FOCUS_MONITORING)
+    suspend fun uploadByInn(@RequestBody request: UploadRequest): Unit =
+        auditClient.audit(event = "FOCUS_UPLOAD_BY_INN", details = "request: $request") {
+            uploader.upload(request)
+        }
+
+    @PostMapping("/uploadByFile")
+    @PreAuthorize(HAS_INITIATION_FOCUS_MONITORING)
+    suspend fun uploadByFile(@RequestPart file: FilePart): UploadResponse =
+        auditClient.audit(event = "FOCUS_UPLOAD_INNS_FILE") {
+            uploader.uploadByFile(file)
+        }
+}package ru.sber.poirot.focus.upload.manual.uploader
+
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
-import ru.sber.poirot.engine.datasources.PoirotDatabaseNames.POIROT_PKAP
-import ru.sber.poirot.engine.datasources.transaction.TransactionTemplates
-import ru.sber.poirot.engine.datasources.transaction.inTransactionSuspend
-import ru.sber.poirot.engine.dsl.*
-import ru.sber.poirot.engine.dsl.metamodel.PrimitiveField
-import ru.sber.poirot.engine.metamodel.focusMonitoringRecord
-import ru.sber.poirot.engine.model.api.monitoring.FocusMonitoringRecord
-import ru.sber.poirot.engine.model.full.monitoring.FakeReportDate
-import ru.sber.poirot.focus.shared.records.model.FmRecord
-import ru.sber.poirot.focus.shared.records.model.FmRecord.Companion.toFocusRecord
-import ru.sber.poirot.focus.shared.records.model.FmRecordInfo
-import ru.sber.poirot.focus.shared.records.model.toRecordInfo
-import ru.sber.poirot.utils.withMeasurement
-import ru.sber.sql.persister.AsyncGraphPersister
-import ru.sber.utils.logger
-import ru.sber.poirot.engine.model.api.monitoring.FakeReportDate as ApiFakeReportDate
+import ru.sber.poirot.CurrentUser
+import ru.sber.poirot.focus.shared.dictionaries.model.InputSource.MANUAL
+import ru.sber.poirot.focus.shared.records.dao.FmRecordDao
+import ru.sber.poirot.focus.upload.general.Default
+import ru.sber.poirot.focus.upload.general.toFocusMonitoringRecord
+import ru.sber.poirot.focus.upload.manual.*
+import ru.sber.poirot.focus.upload.manual.VerifyEgrulStatus.EgrulNotFound
+import ru.sber.poirot.focus.upload.manual.uploader.collect.DefaultCollector
+import ru.sber.poirot.focus.upload.manual.uploader.parse.RequestParser
+import ru.sber.poirot.focus.upload.manual.uploader.reject.RejectFilePreparer
+import ru.sber.poirot.focus.upload.manual.uploader.validate.EventValidator
+import ru.sber.poirot.focus.upload.manual.uploader.validate.InnValidator
 
 @Service
-class DslFmRecordDao(
-    private val persister: AsyncGraphPersister,
-    private val transactionTemplates: TransactionTemplates,
-) : FmRecordDao {
-    private val log = logger()
-
-    override suspend fun findRecordInfos(
-        filter: Filter,
-        orderBy: PrimitiveField<*>,
-        order: Order,
-        limit: Int,
-    ): List<FmRecordInfo> =
-        withMeasurement(message = "Find focus monitoring record infos", logger = log) {
-            (findAll(
-                entity = focusMonitoringRecord,
-                order = order,
-                orderBy = listOf(orderBy),
-                limit = limit,
-                batch = false
-            ) fetchFields { listOf(id) } where {
-                filter
-            }).map { it.toRecordInfo() }
-        }
-
-    override suspend fun findRecordBy(recordId: Long): FmRecord? =
-        withMeasurement(message = "Find focus monitoring record by id", logger = log) {
-            (findFirst(entity = focusMonitoringRecord, batch = false) fetchFields {
-                allFieldsWithRelations
-            } where {
-                id `=` recordId
-            })?.toFocusRecord()
-        }
-
-    override suspend fun findRecordsBy(recordIds: List<Long>): List<FmRecord> =
-        withMeasurement(message = "Find focus monitoring records by ids", logger = log) {
-            (findAll(entity = focusMonitoringRecord, batch = false) fetchFields {
-                allFieldsWithRelations
-            } where {
-                id `in` recordIds
-            }).map { it.toFocusRecord() }
-        }
-
-    override suspend fun <R> findRecordAttributes(
-        recordIds: List<Long>,
-        fields: List<PrimitiveField<*>>,
-        convert: (FocusMonitoringRecord) -> R,
-    ): List<R> = withMeasurement(message = "Get focus monitoring records attributes", logger = log) {
-        (findAll(entity = focusMonitoringRecord, batch = false) fetchFields {
-            fields
-        } where {
-            id `in` recordIds
-        }).map(convert)
-    }
-
-    override suspend fun findRecordBy(recordId: Long, statuses: List<Int>): FmRecord? =
-        withMeasurement(message = "Find focus monitoring record by id and statuses", logger = log) {
-            (findFirst(entity = focusMonitoringRecord, batch = false) fetchFields {
-                allFieldsWithRelations
-            } where {
-                id `=` recordId
-                status `in` statuses
-            })?.toFocusRecord()
-        }
-
-    override suspend fun findRecordBy(
-        recordId: Long,
-        statuses: List<Int>,
-        executorLogin: String,
-    ): FmRecord? =
-        withMeasurement(message = "Find focus monitoring record by id, statuses and login", logger = log) {
-            (findFirst(entity = focusMonitoringRecord, batch = false) fetchFields {
-                allFieldsWithRelations
-            } where {
-                id `=` recordId
-                executor `=` executorLogin
-                status `in` statuses
-            })?.toFocusRecord()
-        }
-
-    override suspend fun existsInStatus(recordId: Long, statusParam: Int): Boolean =
-        withMeasurement(message = "Exists focus monitoring record with id and status", logger = log) {
-            existsAny(focusMonitoringRecord, batch = false) where {
-                id `=` recordId
-                status `=` statusParam
-            }
-        }
-
-    override suspend fun merge(record: FocusMonitoringRecord) {
-        persister.merge(listOf(record))
-    }
-
-    override suspend fun mergeWithChildren(record: FocusMonitoringRecord) {
-        transactionTemplates[POIROT_PKAP].inTransactionSuspend {
-            val oldIds = getFakeReportDates(record.id)?.map { it.id } ?: emptyList()
-            val newIds = record.fakeReport?.affectedDates?.map { it.id } ?: emptyList()
-            persister.deleteByIds(FakeReportDate::class.java, oldIds - newIds.toSet())
-            persister.merge(listOf(record))
+class UploaderImpl(
+    private val parser: RequestParser,
+    private val innValidator: InnValidator,
+    private val eventValidator: EventValidator,
+    private val rejectFilePreparer: RejectFilePreparer,
+    private val defaultCollector: DefaultCollector,
+    private val focusDao: FmRecordDao,
+    private val currentUser: CurrentUser
+) : Uploader {
+    override suspend fun verifyEgrulByInn(request: UploadRequest): VerifyEgrulStatus {
+        val result = runCatching { innValidator.validate(request.wrap(), onError = { throw EgrulNotFound() }) }
+        return when {
+            result.exceptionOrNull() is EgrulNotFound -> VerifyEgrulStatus.EGRUL_MISSING
+            else -> VerifyEgrulStatus.SUCCESS
         }
     }
 
-    private suspend fun getFakeReportDates(recordId: Long): List<ApiFakeReportDate>? =
-        (findFirst(
-            focusMonitoringRecord,
-            batch = false,
-        ) fetchFields {
-            fakeReport.affectedDates.allFields
-        } where {
-            id `=` recordId
-        })?.fakeReport?.affectedDates
+    override suspend fun verifyDefaultByInn(request: UploadRequest): VerifyDefaultStatus =
+        eventValidator.validate(request.inn)
 
-    override suspend fun merge(records: List<FocusMonitoringRecord>): Unit = persister.merge(records)
-
-    override suspend fun insert(records: List<FocusMonitoringRecord>): Unit = persister.insert(records)
-}package ru.sber.sql.persister.async
-
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.withContext
-import org.springframework.context.annotation.Primary
-import org.springframework.stereotype.Service
-import org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive
-import ru.sber.jpa.databaseName
-import ru.sber.poirot.engine.datasources.DataSources
-import ru.sber.poirot.engine.datasources.PoirotDataSource
-import ru.sber.sql.persister.AsyncGraphPersister
-import ru.sber.sql.persister.GraphPersister
-import ru.sber.sql.persister.sync.SkipStrategy
-import ru.sber.utils.newNamedForkJoinDispatcher
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicInteger
-import javax.sql.DataSource
-import kotlin.reflect.KFunction1
-
-@Primary
-@Service
-class AsyncGraphPersisterImpl(
-    override val persister: GraphPersister,
-    private val dataSources: DataSources
-) : AsyncGraphPersister {
-    private val ioDispatchers = ConcurrentHashMap<DataSource, CoroutineDispatcher>()
-
-    override suspend fun insert(entities: List<*>, skip: SkipStrategy): Unit =
-        changeContextIfNotTransactional(entities) {
-            persister.insert(entities, skip)
-        }
-
-    override suspend fun <T> insertChildrenOf(
-        parents: List<T>,
-        childrenGetter: KFunction1<T, List<*>>,
-        skip: SkipStrategy,
-    ): Unit = changeContextIfNotTransactional(parents) {
-        persister.insertChildrenOf(parents, childrenGetter, skip)
+    override suspend fun upload(request: UploadRequest) {
+        val defaults = defaultCollector.collect(request).correct
+        doUpload(defaults)
     }
 
-    override suspend fun merge(entities: List<*>, skip: SkipStrategy): Unit =
-        changeContextIfNotTransactional(entities) {
-            persister.merge(entities, skip)
+    override suspend fun uploadByFile(file: FilePart): UploadResponse {
+        val (clear, rejected) = parser.parse(file)
+            .partition { it.hasNoError() }
+
+        val result = defaultCollector.collectAll(clear.map { it.request })
+        doUpload(result.correct)
+        val errors = rejected.asUploadErrors() + result.rejected
+        val rejectedFile = rejectFilePreparer.prepare(errors)
+
+        return UploadResponse(
+            fileName = file.filename(),
+            success = result.correct.size,
+            failed = errors.size,
+            file = rejectedFile
+        )
+    }
+
+    private suspend fun doUpload(defaults: List<Default>) {
+        val login = currentUser.userName()
+        val records = defaults.map { it.toFocusMonitoringRecord(MANUAL, login) }
+        focusDao.insert(records)
+    }
+
+    companion object {
+        val manualLoadLog: Logger = LoggerFactory.getLogger("ManualLoadLogger")
+    }
+}package ru.sber.poirot.focus.upload.manual.uploader.collect
+
+import ru.sber.poirot.focus.shared.dictionaries.model.MonitoringStatus.AGREED
+import ru.sber.poirot.focus.shared.dictionaries.model.MonitoringStatus.DELETED
+import ru.sber.poirot.focus.upload.general.*
+import ru.sber.poirot.focus.upload.manual.UploadRequest
+import ru.sber.poirot.focus.upload.manual.uploader.UploadError
+import ru.sber.poirot.focus.upload.manual.uploader.collect.UploadErrorType.*
+import ru.sber.poirot.focus.upload.manual.uploader.collect.dao.CollectorDao
+import ru.sber.poirot.focus.upload.manual.uploader.fetch.DefaultInfoDao
+
+class CollectingProcess(
+    private val requests: List<UploadRequest>,
+    private val defaultInfoDao: DefaultInfoDao,
+    private val collectorDao: CollectorDao,
+    private val generalInfoProvider: GeneralInfoProvider,
+    onError: (UploadErrorType) -> Unit = { }
+) : ErrorHolder<String, UploadErrorType>(onError) {
+
+    private val innToProcessType: Map<String, Int> = requests.associateBy({ it.inn }) { it.processType }
+    private val innToRequest: Map<String, UploadRequest> = requests.associateBy { it.inn }
+
+    suspend fun collect(): CollectResult {
+        val inns = requests.map { it.inn }
+        checkExistedFmRecordsBy(inns)
+
+        val events = collectEvents(requests)
+
+        val generalClientInfos = generalInfoProvider.fetchClientInfosBy(inns, events)
+        generalClientInfos.submitErrors()
+        val defaults = defaultsFrom(inns, events, generalClientInfos)
+
+        return CollectResult(defaults, getErrors())
+    }
+
+    private suspend fun collectEvents(requests: List<UploadRequest>): List<DefaultInfo> {
+        val inns = requests.map { it.inn }
+        val clients = defaultInfoDao.findDefaultClientInfosBy(inns)
+        val clientInns = clients.map { it.inn }
+        val events = defaultInfoDao.findDefaultEventInfosBy(clientInns)
+
+        return defaultInfosFrom(clients, events)
+    }
+
+    private suspend fun checkExistedFmRecordsBy(inns: List<String>) {
+        val innToStatuses = collectorDao.findInnToStatuses(inns)
+
+        innToStatuses.filter { (_, statuses) ->
+            statuses.any { it !in setOf(AGREED.id, DELETED.id) }
+        }.forEach { (inn, _) ->
+            submitErrorFor(inn, HAS_FOCUS_MONITORING_RECORD)
         }
+    }
 
-    override suspend fun deleteById(entityClass: Class<*>, id: Any): Boolean =
-        changeContextIfNotTransactional(entityClass) {
-            persister.deleteById(entityClass, id)
-        }
+    private fun defaultsFrom(
+        inns: List<String>,
+        defaultInfos: List<DefaultInfo>,
+        generalInfos: List<GeneralClientInfo>
+    ): List<Default> {
+        val innToDefaultInfo = defaultInfos.associateBy { it.inn }
+        val innToClientInfo = generalInfos.associateBy { it.inn }
+        val defaults = inns.mapNotNull { inn ->
+            val defaultInfo = innToDefaultInfo[inn]
+            val clientInfo = innToClientInfo[inn]
 
-    override suspend fun deleteByIds(entityClass: Class<*>, ids: List<Any>): Int =
-        changeContextIfNotTransactional(entityClass) {
-            persister.deleteByIds(entityClass, ids)
-        }
-
-    private suspend fun changeContextIfNotTransactional(entities: List<*>, block: () -> Unit) =
-        entities.firstNotNullOfOrNull { it }?.javaClass?.let {
-            changeContextIfNotTransactional(it, block)
-        } ?: Unit
-
-    private suspend fun <T> changeContextIfNotTransactional(cls: Class<*>, block: () -> T): T = when {
-        isActualTransactionActive() -> block()
-        else -> withContext(
-            ioDispatchers.computeIfAbsent(dataSources.dataSource(cls.databaseName())) { dataSource ->
-                val database: String = (dataSource as? PoirotDataSource)?.config?.database
-                    ?: unknownDataSourceNumber.getAndIncrement().toString()
-                newNamedForkJoinDispatcher(
-                    prefix = "persister-$database-",
-                    poolSize = (dataSource as? PoirotDataSource)?.config?.hikariConnections?.maxHikari ?: 30
+            if (hasNoErrorsFor(inn)) {
+                val req = innToRequest[inn]
+                return@mapNotNull Default(
+                    defaultInfo = defaultInfo,
+                    clientInfo = clientInfo!!,
+                    processType = innToProcessType[inn]!!,
+                    slaByDefault = req?.slaByDefault,
+                    initiatorComment = req?.initiatorComment
                 )
             }
-        ) { block() }
+            null
+        }
+        return defaults
     }
 
-    private val unknownDataSourceNumber = AtomicInteger()
-} Изменения в логике трех АПИ /focus-monitoring/api/inwork/send-to-agreement, /focus-monitoring/api/edit и /focus-monitoring/api/inwork/save:
-сохранять массив InWorkRequest.monitoringProcessFraudSchemas в БД в таблицу focus_monitoring.monitoring_process_fraud_scheme
+    private fun defaultInfosFrom(
+        clientInfos: List<DefaultClientInfo>,
+        eventInfos: List<DefaultEventInfo>
+    ): List<DefaultInfo> {
+        val innToDefaultEvent = eventInfos.associateBy { it.inn }
 
-focus_monitoring.monitoring_process_fraud_scheme.id	Технический id, автоинкремент
-focus_monitoring.monitoring_process_fraud_scheme.focus_monitoring_record_id	
-Внешний ключ на задачу
+        val defaultInfos = clientInfos.map { client ->
+            val event = innToDefaultEvent[client.inn]
 
-focus_monitoring.focus_monitoring_record.id
+            DefaultInfo(
+                aspId = event?.aspId,
+                eventId = event?.eventId,
+                name = client.name,
+                inn = client.inn,
+                clientId = client.clientId,
+                beginDate = event?.beginDate,
+                defaultType = event?.defaultType,
+            )
+        }
 
-focus_monitoring.monitoring_process_fraud_scheme.scheme	
-Берем из запроса АПИ InWorkRequest.monitoringProcessFraudSchemas.fraudSchemeId
-Находим соответствующую запись из справочника re_dictionaries.fraud_reasons_corp по id =fraudSchemeId
-Используем re_dictionaries.fraud_reasons_corp.key
-focus_monitoring.monitoring_process_fraud_scheme.full_comment	из запроса апи InWorkRequest.monitoringProcessFraudSchemas.fullComment
-focus_monitoring.monitoring_process_fraud_scheme.short_comment	из запроса апи InWorkRequest.monitoringProcessFraudSchemas.shortComment
-если записей ранее не было, то вставляем записи из запроса, если были, то удаляем все записи по задаче и добавляем записи из запроса
+        return defaultInfos
+    }
+
+    private fun List<GeneralClientInfo>.submitErrors() {
+        filter { it.isCorpCompanyNull }.mapNotNull { it.inn }
+            .forEach { inn -> submitErrorFor(inn, CORP_COMPANY_NOT_FOUND) }
+    }
+
+    private fun getErrors(): List<UploadError> =
+        getKeyToErrors().map { (inn, errors) ->
+            UploadError(inn, innToProcessType[inn] ?: -1, errors)
+        }
+}
