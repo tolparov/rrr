@@ -11,6 +11,7 @@ import ru.sber.poirot.focus.shared.records.model.FmRecord
 import ru.sber.poirot.fraud.client.FraudManager
 import ru.sber.poirot.fraud.client.KtorFraudClient
 import ru.sber.poirot.fraud.model.FraudRecord
+import ru.sber.poirot.fraud.model.FraudRegistryType
 import ru.sber.poirot.suspicion.dictionaries.fraudSchemeCorps
 import ru.sber.utils.ifNotEmpty
 import ru.sber.utils.logger
@@ -73,27 +74,44 @@ class FmFraudManager(private val ktorFraudClient: KtorFraudClient) : FraudManage
     ): List<FraudRecord> {
         val fraudReasonsCorp = fraudSchemeCorps.asSet().toList()
         return if (processType == 11 && !monitoringProcessFraudSchemas.isNullOrEmpty()) {
-            monitoringProcessFraudSchemas
+            val monitoringFrauds = monitoringProcessFraudSchemas.map { scheme ->
+                FraudRecord.fraudRecord(
+                    type = FraudRegistryType.LE_CLIENT.type,
+                    key = inn!!,
+                    keyNoApp = inn,
+                    fraudStatus = SUSPICION.code,
+                    scheme = fraudReasonsCorp.filter { it.id == scheme.fraudSchemeId }.map { it.name },
+                    source = "monitoring_ksb",
+                    fullComment = scheme.fullComment ?: summary,
+                    shortComment = scheme.shortComment ?: summaryKp,
+                    login = executor,
+                    dateTime = LocalDateTime.now(),
+                    typeFraud = "Последующий",
+                    incomingDate = dateApproval?.toLocalDate() ?: LocalDate.now(),
+                    corpControlMode = fmFraudCorpControlMode,
+                    fraudAdditionalInfo = null
+                )
+            }
+
+//            val generalFrauds = fraudSchemes.mapNotNull { it.fraudRecord(this, canBeDeleted, inProcessFraud) }
+            val fraudsBySuspicions = monitoringProcessFraudSchemas
                 .map { scheme ->
                     if (executor != null) {
                         fraudRecordsBySuspicions(
                             fraudReasonsCorp,
                             gfmFraudSource,
-                            scheme.shortComment,
-                            scheme.fullComment,
                             executor,
                             gfmTypeFraud
                         )
                     }
                 }
+
                 (generalFrauds + fraudsBySuspicions).distinct()
         } else {
             val generalFrauds = fraudSchemes.mapNotNull { it.fraudRecord(this, canBeDeleted, inProcessFraud) }
             val fraudsBySuspicions = fraudRecordsBySuspicions(
                 fraudReasonsCorp,
                 fmFraudSource,
-                summaryKp,
-                summary,
                 fmFraudLogin,
                 typeFraud(inProcessFraud)
             )
@@ -104,8 +122,6 @@ class FmFraudManager(private val ktorFraudClient: KtorFraudClient) : FraudManage
     private fun FmRecord.fraudRecordsBySuspicions(
         fraudSchemes: List<FraudReasonsCorp>,
         source: String?,
-        shortComment: String?,
-        fullComment: String?,
         login: String,
         typeFraud: String?
     ): List<FraudRecord> = suspicions.suspicions(fraudSchemes)
@@ -119,8 +135,8 @@ class FmFraudManager(private val ktorFraudClient: KtorFraudClient) : FraudManage
                 fraudStatus = SUSPICION.code,
                 scheme = fraudKey.scheme,
                 source = source,
-                fullComment = fullComment,
-                shortComment = shortComment,
+                fullComment = summary,
+                shortComment = summaryKp,
                 login = login,
                 dateTime = LocalDateTime.now(),
                 typeFraud = typeFraud,
@@ -129,4 +145,8 @@ class FmFraudManager(private val ktorFraudClient: KtorFraudClient) : FraudManage
                 fraudAdditionalInfo = null,
             )
         }
-} вроде написал для подозрительныз лиц логику осталось для основного клиента
+} помоги дописать логику с получением scheme name по id  Type mismatch.
+Required:
+String
+Found:
+List<String!>
