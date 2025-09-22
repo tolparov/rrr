@@ -225,4 +225,4 @@ enum class ProcessType(val type: String, val codeName: String, val serviceName: 
         fun byTypeName(typeName: String): ProcessType = entries.firstOrNull { it.type == typeName }
             ?: throw IllegalArgumentException("no found processType: $typeName")
     }
-} так как я делаю доработку в одном сервисе то для нового процесса я указал focus-monitoring и получается что происходит два запроса и записи дублируются я хотел попробовать добавить флаг в поле metadata чтоб вызывать сервис один раз
+} так как я делаю доработку в одном сервисе то для нового процесса я указал focus-monitoring и получается что происходит два запроса и записи дублируются я хотел попробовать добавить флаг в поле metadata чтоб вызывать сервис один раз и чтоб записи были двух разных процессов получается когда id 11 то процесс MON
