@@ -1,3 +1,12 @@
+@Component
+class FmDpaExecutorRequestBuilder(
+    private val strategyFactory: MonitoringProcessStrategyFactory
+) {
+    suspend fun build(task: FmRecord): Any {
+        val strategy = strategyFactory.forProcessType(task.processTypeEnum())
+        return strategy.buildExecutorRequest(task)
+    }
+}
 package ru.sber.poirot.dpa.request
 
 import ru.sber.poirot.dpa.model.rqrs.DpaRequest
