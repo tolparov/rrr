@@ -1,121 +1,40 @@
-package ru.sber.poirot.focus.shared.dpa.strategy
+package ru.sber.poirot.dpa.request
 
-import org.springframework.stereotype.Component
-import ru.sber.poirot.dpa.model.ProcessType
-import ru.sber.poirot.focus.shared.records.model.FmRecord
+import ru.sber.poirot.dpa.model.rqrs.DpaRequest
+import ru.sber.poirot.dpa.credit.DpaCreditClientProvider
 
-/**
- * Интерфейс для стратегии билда DPA-запросов
- */
-interface MonitoringProcessStrategy {
-    fun processType(): ProcessType
+fun interface DpaRequestBuilder<T : Any, DpaReq : DpaRequest> {
 
-    fun buildExecutorRequest(task: FmRecord): Any
-    fun buildNotifyRequest(task: FmRecord, status: Any): Any
-    fun buildReassignRequest(wrapper: Any): Any
+    suspend fun build(task: T, creditClientProvider: DpaCreditClientProvider): DpaReq
 }
+package ru.sber.poirot.dpa.request.impl
 
-/**
- * Фабрика выбора стратегии
- */
-@Component
-class MonitoringProcessStrategyFactory(
-    private val strategies: List<MonitoringProcessStrategy>
+import org.springframework.stereotype.Service
+import ru.sber.poirot.dpa.credit.DpaCreditClientProvider
+import ru.sber.poirot.dpa.model.rqrs.DpaChangeSlaRequest
+import ru.sber.poirot.dpa.model.rqrs.DpaExecutorRequest
+import ru.sber.poirot.dpa.model.rqrs.DpaNotifyRequest
+import ru.sber.poirot.dpa.model.rqrs.DpaReassignRequest
+import ru.sber.poirot.dpa.request.DpaRequestBuilder
+
+@Service
+class DpaRequestFactory<T : Any>(
+    private val executorRequestBuilder: DpaRequestBuilder<T, DpaExecutorRequest>,
+    private val notifyRequestBuilder: DpaRequestBuilder<TaskNotifyWrapper<T>, DpaNotifyRequest>,
+    private val reassignRequestBuilder: DpaRequestBuilder<TaskReassignWrapper<T>, DpaReassignRequest>,
+    private val changeSlaRequestBuilder: DpaChangeSlaRequestBuilder,
+    private val clientInfoProvider: DpaCreditClientProvider
 ) {
-    fun forProcessType(processType: ProcessType): MonitoringProcessStrategy =
-        strategies.find { it.processType() == processType }
-            ?: throw IllegalArgumentException("No strategy found for processType=$processType")
-}
 
-package ru.sber.poirot.focus.shared.dpa.strategy
+    suspend fun executorRequest(task: T): DpaExecutorRequest =
+        executorRequestBuilder.build(task, clientInfoProvider)
 
-import org.springframework.stereotype.Component
-import ru.sber.poirot.dpa.model.ProcessType
-import ru.sber.poirot.dpa.model.ProcessType.FOCUS_MONITORING
-import ru.sber.poirot.dpa.model.ProcessType.MONITORING_KSB
-import ru.sber.poirot.focus.shared.records.model.FmRecord
+    suspend fun notifyRequest(task: TaskNotifyWrapper<T>): DpaNotifyRequest =
+        notifyRequestBuilder.build(task, clientInfoProvider)
 
-/**
- * Стратегия для старого процесса (FOCUS_MONITORING)
- */
-@Component
-class FocusMonitoringStrategy : MonitoringProcessStrategy {
-    override fun processType(): ProcessType = FOCUS_MONITORING
+    suspend fun reassignRequest(task: TaskReassignWrapper<T>): DpaReassignRequest =
+        reassignRequestBuilder.build(task, clientInfoProvider)
 
-    override fun buildExecutorRequest(task: FmRecord): Any {
-        // здесь используешь FmDpaExecutorRequestBuilder (как было)
-        return "executorRequest for FOCUS_MONITORING"
-    }
-
-    override fun buildNotifyRequest(task: FmRecord, status: Any): Any {
-        // FmDpaNotifyRequestBuilder
-        return "notifyRequest for FOCUS_MONITORING"
-    }
-
-    override fun buildReassignRequest(wrapper: Any): Any {
-        // FmDpaReassignRequestBuilder
-        return "reassignRequest for FOCUS_MONITORING"
-    }
-}
-
-/**
- * Стратегия для нового процесса (MONITORING_KSB)
- */
-@Component
-class MonitoringKsbStrategy : MonitoringProcessStrategy {
-    override fun processType(): ProcessType = MONITORING_KSB
-
-    override fun buildExecutorRequest(task: FmRecord): Any {
-        // TODO: твоя новая логика (бизнес-линия, параметры)
-        return "executorRequest for MONITORING_KSB"
-    }
-
-    override fun buildNotifyRequest(task: FmRecord, status: Any): Any {
-        // TODO: твоя новая логика
-        return "notifyRequest for MONITORING_KSB"
-    }
-
-    override fun buildReassignRequest(wrapper: Any): Any {
-        // TODO: твоя новая логика
-        return "reassignRequest for MONITORING_KSB"
-    }
-}
-
-package ru.sber.poirot.focus.shared.dpa.config
-
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-import ru.sber.poirot.dpa.listen.DpaProcessTaskFetcher
-import ru.sber.poirot.dpa.model.ProcessType
-import ru.sber.poirot.dpa.model.ProcessType.FOCUS_MONITORING
-import ru.sber.poirot.dpa.model.ProcessType.MONITORING_KSB
-import ru.sber.poirot.focus.shared.dictionaries.model.MonitoringStatus.Companion.getStatusById
-import ru.sber.poirot.focus.shared.records.dao.FmRecordDao
-import ru.sber.poirot.focus.shared.records.model.FmRecord
-import ru.sber.utils.logger
-
-@Configuration
-class FmDpaProcessConfig(
-    private val fmDao: FmRecordDao
-) {
-    private val log = logger()
-
-    @Bean
-    fun fmTaskFetcher(): DpaProcessTaskFetcher<FmRecord> =
-        DpaProcessTaskFetcher { taskId ->
-            fmDao.findRecordBy(taskId.toLong())
-                ?.also {
-                    log.info(
-                        "Fetched focus monitoring taskId={}, status={}",
-                        taskId,
-                        getStatusById(it.statusId)?.status
-                    )
-                }
-        }
-
-    @Bean
-    fun focusMonitoringProcessType(): ProcessType = FOCUS_MONITORING
-
-    @Bean
-    fun monitoringKsbProcessType(): ProcessType = MONITORING_KSB
+    suspend fun changeSlaRequest(task: TaskChangeSlaWrapper): DpaChangeSlaRequest =
+        changeSlaRequestBuilder.build(task, clientInfoProvider)
 }
