@@ -93,15 +93,87 @@ class DefaultDpaRequestManager<T : Any>(
             }
         }
     }.onFailure { onFail.invoke(PARALLEL_RUN_EMPTY_RESPONSE) }.getOrThrow()
-} 
-Description:
+}package ru.sber.poirot.dpa.request.impl
 
-Parameter 2 of constructor in ru.sber.poirot.dpa.request.impl.DefaultDpaRequestManager required a bean of type 'ru.sber.poirot.dpa.model.ProcessType' that could not be found.
+import org.springframework.stereotype.Service
+import ru.sber.poirot.dpa.credit.DpaCreditClientProvider
+import ru.sber.poirot.dpa.model.rqrs.DpaChangeSlaRequest
+import ru.sber.poirot.dpa.model.rqrs.DpaExecutorRequest
+import ru.sber.poirot.dpa.model.rqrs.DpaNotifyRequest
+import ru.sber.poirot.dpa.model.rqrs.DpaReassignRequest
+import ru.sber.poirot.dpa.request.DpaRequestBuilder
 
+@Service
+class DpaRequestFactory<T : Any>(
+    private val executorRequestBuilder: DpaRequestBuilder<T, DpaExecutorRequest>,
+    private val notifyRequestBuilder: DpaRequestBuilder<TaskNotifyWrapper<T>, DpaNotifyRequest>,
+    private val reassignRequestBuilder: DpaRequestBuilder<TaskReassignWrapper<T>, DpaReassignRequest>,
+    private val changeSlaRequestBuilder: DpaChangeSlaRequestBuilder,
+    private val clientInfoProvider: DpaCreditClientProvider
+) {
 
-Action:
+    suspend fun executorRequest(task: T): DpaExecutorRequest =
+        executorRequestBuilder.build(task, clientInfoProvider)
 
-Consider defining a bean of type 'ru.sber.poirot.dpa.model.ProcessType' in your configuration.
+    suspend fun notifyRequest(task: TaskNotifyWrapper<T>): DpaNotifyRequest =
+        notifyRequestBuilder.build(task, clientInfoProvider)
 
+    suspend fun reassignRequest(task: TaskReassignWrapper<T>): DpaReassignRequest =
+        reassignRequestBuilder.build(task, clientInfoProvider)
 
-Process finished with exit code 1
+    suspend fun changeSlaRequest(task: TaskChangeSlaWrapper): DpaChangeSlaRequest =
+        changeSlaRequestBuilder.build(task, clientInfoProvider)
+}package ru.sber.poirot.dpa.request.impl
+
+import org.springframework.stereotype.Component
+import ru.sber.poirot.dpa.credit.DpaCreditClientProvider
+import ru.sber.poirot.dpa.model.rqrs.DpaChangeSlaRequest
+import ru.sber.poirot.dpa.request.DpaRequestBuilder
+
+@Component
+class DpaChangeSlaRequestBuilder : DpaRequestBuilder<TaskChangeSlaWrapper, DpaChangeSlaRequest> {
+
+    override suspend fun build(
+        task: TaskChangeSlaWrapper,
+        creditClientProvider: DpaCreditClientProvider
+    ): DpaChangeSlaRequest = with(task) {
+        DpaChangeSlaRequest(
+            taskId = taskId,
+            processType = processType,
+            initiator = initiator,
+            changeInfo = changeSlaInfo,
+            reason = reason,
+            comment = comment
+        )
+    }
+}package ru.sber.poirot.dpa.request.impl
+
+import org.springframework.stereotype.Service
+import ru.sber.poirot.dpa.credit.DpaCreditClientProvider
+import ru.sber.poirot.dpa.model.rqrs.DpaChangeSlaRequest
+import ru.sber.poirot.dpa.model.rqrs.DpaExecutorRequest
+import ru.sber.poirot.dpa.model.rqrs.DpaNotifyRequest
+import ru.sber.poirot.dpa.model.rqrs.DpaReassignRequest
+import ru.sber.poirot.dpa.request.DpaRequestBuilder
+
+@Service
+class DpaRequestFactory<T : Any>(
+    private val executorRequestBuilder: DpaRequestBuilder<T, DpaExecutorRequest>,
+    private val notifyRequestBuilder: DpaRequestBuilder<TaskNotifyWrapper<T>, DpaNotifyRequest>,
+    private val reassignRequestBuilder: DpaRequestBuilder<TaskReassignWrapper<T>, DpaReassignRequest>,
+    private val changeSlaRequestBuilder: DpaChangeSlaRequestBuilder,
+    private val clientInfoProvider: DpaCreditClientProvider
+) {
+
+    suspend fun executorRequest(task: T): DpaExecutorRequest =
+        executorRequestBuilder.build(task, clientInfoProvider)
+
+    suspend fun notifyRequest(task: TaskNotifyWrapper<T>): DpaNotifyRequest =
+        notifyRequestBuilder.build(task, clientInfoProvider)
+
+    suspend fun reassignRequest(task: TaskReassignWrapper<T>): DpaReassignRequest =
+        reassignRequestBuilder.build(task, clientInfoProvider)
+
+    suspend fun changeSlaRequest(task: TaskChangeSlaWrapper): DpaChangeSlaRequest =
+        changeSlaRequestBuilder.build(task, clientInfoProvider)
+} я хочу понять на что вообще влияет передаваемый processType через бин
