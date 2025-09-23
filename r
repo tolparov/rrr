@@ -378,4 +378,66 @@ class DpaChangeSlaRequest(
     val reason: String,
     @field:Size(max = 2048, message = "Комментарий превышает допустимый лимит: 2048 символов")
     val comment: String? = null,
-) : DpaRequest похоже в сам dis не отправляется processType ?
+) : DpaRequest package ru.sber.poirot.dpa.interaction.sender.model
+
+import ru.sber.poirot.dpa.interaction.listener.dictionaries.DpAction.Companion.dpAction
+import ru.sber.poirot.dpa.interaction.listener.dictionaries.DpEventType.Companion.eventType
+import ru.sber.poirot.dpa.interaction.sender.model.DpNotifyEventType.Companion.dpNotifyEventType
+import ru.sber.poirot.dpa.model.common.*
+import ru.sber.poirot.dpa.model.rqrs.DpaChangeSlaRequest
+import ru.sber.poirot.dpa.model.rqrs.DpaExecutorRequest
+import ru.sber.poirot.dpa.model.rqrs.DpaNotifyRequest
+import ru.sber.poirot.dpa.model.rqrs.DpaReassignRequest
+
+fun DpaExecutorRequest.dpRequest(operId: String): DpExecutorRequest = DpExecutorRequest(
+    keyBusinessObject = BusinessObject(customerId),
+    creationEvent = CreationEvent(),
+    creditBusinessProcess = creditBusinessProcess,
+    initiator = initiator,
+    performerContainer = PerformerContainer(performerCategory.category),
+    taskSource = TaskSource(workId = operId, externalId = taskSourceExternalId ?: operId),
+    taskIdentification = taskIdentification,
+    taskCost = TaskCost(profitOwner)
+)
+
+fun DpaReassignRequest.dpRequest(operId: String): DpReassignRequest = DpReassignRequest(
+    event = ReassignmentEvent(
+        type = mode.eventType(),
+        initiator = DpReassignEmployee(
+            idInfos = initiator.idInfos,
+            fullName = initiator.fullName
+        )
+    ),
+    params = ReassignmentParams(
+        reason = reason,
+        comment = comment,
+        targetPerformer = targetExecutor?.let {
+            DpReassignEmployee(
+                idInfos = it.idInfos,
+                fullName = it.fullName
+            )
+        },
+    )
+)
+
+fun DpaNotifyRequest.dpRequest(operId: String): DpNotifyRequest = DpNotifyRequest(
+    workId = operId,
+    processTaskStatus = processTaskStatus,
+    statusEvent = NotifyStatusEvent(
+        action = processTaskStatus.dpAction(),
+        type = processTaskStatus.dpNotifyEventType(),
+        initiator = initiator
+    ),
+    changeStatusReason = changeStatusReason,
+    requestDecisions = requestDecisions,
+)
+
+fun DpaChangeSlaRequest.dpRequest(operId: String): DpChangeSlaRequest = DpChangeSlaRequest(
+    workId = operId,
+    changeReason = reason,
+    changeEvent = ChangeSlaEvent(
+        initiator = initiator,
+        changeInfo = changeInfo
+    ),
+    comment = comment
+) в итоге в сам дис отправляется этот процес тайп из бина
