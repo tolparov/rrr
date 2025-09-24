@@ -1,39 +1,42 @@
-@Service
-class UnifiedBasketImpl(
-    private val basketLoaders: List<BasketLoader>,
-) : UnifiedBasket {
-    override suspend fun loadRecords(request: RecordsRequest): RecordsResponse {
-        val requestFilter = filterFrom(request)
-
-        // Если в фильтрах есть MON → тянем FM, чтобы оттуда достать MON-записи
-        val effectiveTypes = requestFilter.types.map {
-            if (it == ProcessType.MON) ProcessType.FOCUS_MONITORING else it
+class RequestFilter(
+    val types: List<ProcessType>,
+    private val filtersInfo: Map<FieldName, List<String>>,
+) {
+    fun check(record: BasketRecord): Boolean {
+        // если фильтруем по типу, то сравниваем с record.type
+        if (types.isNotEmpty() && types.none { it.type == record.type }) {
+            return false
         }
 
-        val (successResponses, errorResponses) = basketLoaders
-            .filter { it.type in effectiveTypes }
-            .loadRecords(request)
-            .optimizedPartition { it.success }
-
-        val records = successResponses.toRecords()
-            .map { record ->
-                val processType = (record.record.metadata as? Map<*, *>)?.get("processType")
-                val type = when {
-                    record.type == ProcessType.FOCUS_MONITORING.type && processType == 11 -> ProcessType.MON.type
-                    else -> record.type
-                }
-                record.copy(type = type)
-            }
-            // 👇 фильтрация выполняется уже по подменённому типу
-            .filter { requestFilter.check(it.record.copy(type = it.type)) }
-
-        return RecordsResponse(
-            records = records,
-            warningMessages = errorResponses.toErrorMessages()
-        )
+        return filtersInfo.all { (fieldName, fieldValues) ->
+            record.filterBy(fieldName, fieldValues)
+        }
     }
 
-    private suspend fun List<BasketLoader>.loadRecords(request: RecordsRequest): List<SourceResponse> = coroutineScope {
-        map { loader -> async { loader.getRecords(request) } }.awaitAll()
+    private fun BasketRecord.filterBy(fieldName: FieldName, fieldValues: List<String>): Boolean =
+        when (fieldName) {
+            FieldName.TYPE -> true // тип мы уже проверили отдельно
+            FieldName.NAME -> fieldValues.any { fieldValue ->
+                record.name?.let { name -> fieldValue.lowercase() in name.lowercase() } ?: false
+            }
+            FieldName.APP_ID -> record.appId in fieldValues
+            FieldName.INN -> record.inn in fieldValues
+            FieldName.STATUS -> record.status.lowercase() in fieldValues.map { it.lowercase() }
+        }
+
+    companion object {
+        fun filterFrom(request: RecordsRequest): RequestFilter {
+            fun List<RecordsRequest.FieldFilter>.toTypes(): List<ProcessType> =
+                if (isEmpty()) ProcessType.entries
+                else map { ProcessType.byTypeName(it.fieldValue) }.distinct()
+
+            fun List<RecordsRequest.FieldFilter>.toFiltersInfo(): Map<FieldName, List<String>> =
+                groupBy { it.fieldName }
+                    .mapValues { (_, filters) -> filters.map { it.fieldValue } }
+
+            val (typeFilters, otherFilters) = request.filters.partition { it.fieldName == FieldName.TYPE }
+
+            return RequestFilter(typeFilters.toTypes(), otherFilters.toFiltersInfo())
+        }
     }
 }
