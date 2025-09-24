@@ -1,162 +1,151 @@
-package ru.sber.poirot.focus.stages.edit.impl
+package ru.sber.poirot.focus.stages
 
 import org.springframework.stereotype.Service
-import ru.sber.poirot.engine.model.full.monitoring.FocusMonitoringRecord
+import ru.sber.poirot.engine.dictionaries.model.api.fraud.FraudReasonsCorp
 import ru.sber.poirot.exception.FrontException
-import ru.sber.poirot.focus.shared.contract.checkFields
-import ru.sber.poirot.focus.shared.contract.toFocusMonitoringRecord
-import ru.sber.poirot.focus.shared.dictionaries.model.MonitoringStatus.AGREED
-import ru.sber.poirot.focus.shared.infra.error.FocusErrorCode.*
-import ru.sber.poirot.focus.shared.records.dao.FmRecordDao
+import ru.sber.poirot.focus.shared.dictionaries.inProcessFraudsCache
+import ru.sber.poirot.focus.shared.dictionaries.model.*
+import ru.sber.poirot.focus.shared.dictionaries.model.FraudCode.SUSPICION
+import ru.sber.poirot.focus.shared.dictionaries.model.FraudScheme.*
+import ru.sber.poirot.focus.shared.dictionaries.model.FraudScheme.Companion.fraudSchemes
 import ru.sber.poirot.focus.shared.records.model.FmRecord
-import ru.sber.poirot.focus.shared.records.model.FmRecord.Companion.toFocusRecord
-import ru.sber.poirot.focus.shared.records.suspicion.SuspicionsDto
-import ru.sber.poirot.focus.stages.edit.EditRequest
-import ru.sber.poirot.focus.stages.edit.RecordEditor
 import ru.sber.poirot.fraud.client.FraudManager
+import ru.sber.poirot.fraud.client.KtorFraudClient
+import ru.sber.poirot.fraud.model.FraudRecord
+import ru.sber.poirot.fraud.model.FraudRegistryType
 import ru.sber.poirot.suspicion.dictionaries.fraudSchemeCorps
-import ru.sber.poirot.suspicion.manage.SuspicionManager
+import ru.sber.utils.ifNotEmpty
+import ru.sber.utils.logger
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Service
-class RecordEditorImpl(
-    private val focusDao: FmRecordDao,
-    private val suspicionManager: SuspicionManager,
-    private val fraudManager: FraudManager<FmRecord>,
-) : RecordEditor {
+class FmFraudManager(private val ktorFraudClient: KtorFraudClient) : FraudManager<FmRecord> {
+    private val log = logger()
 
-    override suspend fun edit(request: EditRequest) {
-        request.checkFields(EDITED_WITHOUT_FRAUD_SIGNS, EDITED_VALIDATION_FAILED)
-        val focusRecord = focusRecord(request.recordId, request.suspicions)
-        val editedFmRecord = editedFmRecord(request, focusRecord)
-        val fraudSchemes = fraudSchemeCorps.asSet().toList()
-
-        suspicionManager.persist(
-            request.recordId.toString(),
-            focusRecord.suspicions.suspicions(fraudSchemes).suspicionEntities()
-        ) {
-            focusDao.mergeWithChildren(editedFmRecord)
-            fraudManager.editFrauds(
-                FraudManager.RecordPair(
-                    new = editedFmRecord.toFocusRecord(),
-                    previous = focusRecord,
+    override suspend fun addFrauds(records: List<FmRecord>) {
+        val inProcessFraudsByCode = inProcessFraudsCache.asMap()
+        records.filter { it.confirmedFraud == true }
+            .flatMap {
+                it.fraudRecords(
+                    fraudSchemes = fraudSchemes,
+                    canBeDeleted = false,
+                    inProcessFraud = inProcessFraudsByCode[it.inProcessFraud],
                 )
+            }
+            .also { log.info("Adding ${it.size} fraud records:\n$it") }
+            .ifNotEmpty { ktorFraudClient.addFrauds(it) }
+    }
+
+    override suspend fun editFrauds(recordPairs: List<FraudManager.RecordPair<FmRecord>>) {
+        val inProcessFraudsByCode = inProcessFraudsCache.asMap()
+        recordPairs
+            .flatMap {
+                it.new.fraudRecords(
+                    fraudSchemes = it.getUpdatedFraudSchemes(),
+                    canBeDeleted = true,
+                    inProcessFraud = inProcessFraudsByCode[it.new.inProcessFraud],
+                    previousExecutor = it.previous.executor
+
+                )
+            }
+            .also { log.info("Editing ${it.size} fraud records:\n$it") }
+            .ifNotEmpty { ktorFraudClient.addFrauds(it) }
+    }
+
+    private fun FraudManager.RecordPair<FmRecord>.getUpdatedFraudSchemes(): List<FraudScheme> = buildList {
+        if (new.capitalOutFlow != previous.capitalOutFlow) add(CAPITAL_OUTFLOW)
+        if (new.bankruptcy != previous.bankruptcy) add(BANKRUPTCY)
+        if (new.fakeReportDoc != previous.fakeReportDoc) add(FAKE_DOC)
+        if (new.fakeReport != previous.fakeReport) add(FAKE_REPORT)
+        if (new.inProcessFraud != previous.inProcessFraud
+            || new.summary != previous.summary
+            || new.summaryKp != previous.summaryKp
+            || new.dateFraud != previous.dateFraud
+        ) {
+            if (new.capitalOutFlow?.isNotEmpty == true) add(CAPITAL_OUTFLOW)
+            if (new.bankruptcy?.isNotEmpty == true) add(BANKRUPTCY)
+            if (new.fakeReportDoc?.isNotEmpty == true) add(FAKE_DOC)
+            if (new.fakeReport?.isNotEmpty == true) add(FAKE_REPORT)
+        }
+    }.distinct()
+
+    private fun FmRecord.fraudRecords(
+        fraudSchemes: List<FraudScheme>,
+        canBeDeleted: Boolean,
+        inProcessFraud: String?,
+        previousExecutor: String? = null
+    ): List<FraudRecord> {
+        val fraudReasonsCorp = fraudSchemeCorps.asSet().toList()
+        val fraudReasonsCorpsDbList = fraudReasonsCorp.associate { it.key to it.id }
+        val fraudReasonsCorpsEnumList = FraudScheme.fraudSchemeIdByCode
+
+        val mergedFraudReasons = fraudReasonsCorpsDbList + fraudReasonsCorpsEnumList
+
+        return if (processType == 11 && !monitoringProcessFraudSchemas.isNullOrEmpty()) {
+            val monitoringFrauds = monitoringProcessFraudSchemas.map { scheme ->
+                val fraudScheme = mergedFraudReasons.entries.firstOrNull { it.value == scheme.fraudSchemeId }?.key ?: throw FrontException("id=$id fraudSchemeId=${scheme.fraudSchemeId}")
+                FraudRecord.fraudRecord(
+                    type = FraudRegistryType.LE_CLIENT.type,
+                    key = inn!!,
+                    keyNoApp = inn,
+                    fraudStatus = SUSPICION.code,
+                    scheme = fraudScheme ,
+                    source = "monitoring_ksb",
+                    fullComment = scheme.fullComment ?: summary,
+                    shortComment = scheme.shortComment ?: summaryKp,
+                    login = executor,
+                    dateTime = LocalDateTime.now(),
+                    typeFraud = "Последующий",
+                    incomingDate = dateApproval?.toLocalDate() ?: LocalDate.now(),
+                    corpControlMode = fmFraudCorpControlMode,
+                    fraudAdditionalInfo = null
+                )
+            }
+            val fraudsBySuspicions = fraudRecordsBySuspicions(
+                fraudReasonsCorp,
+                gfmFraudSource,
+                executor ?: previousExecutor ?: throw FrontException("Исполнитель должен быть назначен"),
+                gfmTypeFraud
+            )
+
+            (monitoringFrauds + fraudsBySuspicions).distinct()
+        } else {
+            val generalFrauds = fraudSchemes.mapNotNull { it.fraudRecord(this, canBeDeleted, inProcessFraud) }
+            val fraudsBySuspicions = fraudRecordsBySuspicions(
+                fraudReasonsCorp,
+                fmFraudSource,
+                fmFraudLogin,
+                typeFraud(inProcessFraud)
+            )
+            (generalFrauds + fraudsBySuspicions).distinct()
+        }
+    }
+
+    private fun FmRecord.fraudRecordsBySuspicions(
+        fraudSchemes: List<FraudReasonsCorp>,
+        source: String?,
+        login: String,
+        typeFraud: String?
+    ): List<FraudRecord> = suspicions.suspicions(fraudSchemes)
+        .suspicionEntities()
+        .map { suspicionEntity ->
+            val fraudKey = suspicionEntity.fraudKey()
+            FraudRecord.fraudRecord(
+                type = fraudKey.type,
+                key = fraudKey.key,
+                keyNoApp = fraudKey.key,
+                fraudStatus = SUSPICION.code,
+                scheme = fraudKey.scheme,
+                source = source,
+                fullComment = summary,
+                shortComment = summaryKp,
+                login = login,
+                dateTime = LocalDateTime.now(),
+                typeFraud = typeFraud,
+                incomingDate = dateApproval?.toLocalDate() ?: LocalDate.now(),
+                corpControlMode = fmFraudCorpControlMode,
+                fraudAdditionalInfo = null,
             )
         }
-    }
-
-    private suspend fun focusRecord(recordId: Long, suspicions: SuspicionsDto): FmRecord =
-        focusDao.findRecordBy(recordId, listOf(AGREED.id))
-            ?.copy(suspicions = suspicions) ?: throw FrontException(INCORRECT_STATUS, "$AGREED")
-
-    private fun editedFmRecord(
-        request: EditRequest,
-        fmRecord: FmRecord,
-    ): FocusMonitoringRecord {
-        if (request.suspicions.les.any { it.inn == fmRecord.inn }) {
-            throw FrontException(SUSPICIONS_CONTAINS_MAIN_INN)
-        }
-
-        return request.toFocusMonitoringRecord(fmRecord).apply { changed = true }
-    }
-}package ru.sber.poirot.focus.shared.contract
-
-import ru.sber.poirot.engine.model.full.monitoring.*
-import ru.sber.poirot.focus.shared.contract.frauds.MonitoringProcessFraudSchema
-import ru.sber.poirot.focus.shared.dictionaries.model.MonitoringStatus
-import ru.sber.poirot.focus.shared.records.model.FmRecord
-
-fun ChangeRequest.toFocusMonitoringRecord(
-    record: FmRecord,
-    newStatus: MonitoringStatus? = null,
-): FocusMonitoringRecord {
-    val self = this@toFocusMonitoringRecord
-
-    return FocusMonitoringRecord().apply {
-        id = self.recordId
-        status = when {
-            newStatus != null -> newStatus.id
-            else -> record.statusId
-        }
-        inn = record.inn
-        inputSource = record.inputSource
-        processType = record.processType
-        beginDate = self.pb.beginDate
-        dateApproval = record.dateApproval
-        dateCurrentDelay = self.pb.dateCurrentDelay
-        dateLastContract = self.pb.dateLastContract
-        externalFactor = self.pb.externalFactor
-        externalFactorOther = self.pb.externalFactorOther
-        dateNpl90 = self.pb.dateNpl90
-        confirmedFraud = self.fraudSigns.confirmedFraud?.value
-        inProcessFraud = self.fraudSigns.inProcessFraud
-        dateFraud = self.fraudSigns.dateFraud
-        incidentOr = self.fraudSigns.incidentOr?.value
-        fraudSchemas = self.fraudSchemas.toStringFraudSchemas()
-        repeatedMonitoring = self.fraudSigns.repeatedMonitoring?.value
-        internalFraud = self.fraudSigns.internalFraud?.value
-        summary = self.conclusion.summary
-        summaryKp = self.conclusion.summaryKp
-        expertActions = self.conclusion.expertActions
-        defaultType = self.pb.defaultType
-        datePotentialFraud = self.fraudSigns.datePotentialFraud
-        dateActualFraud = self.fraudSigns.dateActualFraud
-        incidentOrDate = self.fraudSigns.incidentOrDate
-
-        if (record.processType != 11) {
-            capitalOutflow = self.capitalOutflow()
-            fakeReport = self.fakeReport()
-            bankruptcy = self.bankruptcy()
-        }
-        monitoringProcessFraudSchemes = self.monitoringProcessFraudSchemas?.toMonitoringProcessFraudSchema()
-    }
 }
-
-fun ChangeRequest.capitalOutflow(): CapitalOutflow {
-    val self = this@capitalOutflow
-    return CapitalOutflow().apply {
-        affectedByDefault = self.capitalOutflow.affectedByDefault
-        startDate = self.capitalOutflow.startDate
-        comment = self.capitalOutflow.comment
-    }
-}
-
-fun ChangeRequest.fakeReport(): FakeReport {
-    val self = this@fakeReport
-    return FakeReport().apply {
-        affectedDate = self.fakeReport.affectedDates.minOrNull()
-        type = self.fakeReport.type
-        affectedByDefault = self.fakeReport.affectedByDefault
-        affectedByDocDefault = self.fakeReportDoc.affectedByDefault
-        affectedByDocDate = self.fakeReportDoc.affectedDate
-        affectedDates = self.fakeReport.affectedDates.map {
-            FakeReportDate().apply {
-                affectedDate = it
-            }
-        }
-    }
-}
-
-fun ChangeRequest.bankruptcy(): Bankruptcy {
-    val self = this@bankruptcy
-    return Bankruptcy().apply {
-        sign = self.bankruptcy.sign
-        affectedByDefault = self.bankruptcy.affectedByDefault
-        affectedDate = self.bankruptcy.affectedDate
-    }
-}
-
-fun List<MonitoringProcessFraudSchema>.toMonitoringProcessFraudSchema(): List<MonitoringProcessFraudScheme> =
-    this.map {
-        MonitoringProcessFraudScheme().apply {
-            fraudSchemeId = it.fraudSchemeId
-            shortComment = it.shortComment
-            fullComment = it.fullComment
-        }
-    }
-
-private fun List<Int>?.toStringFraudSchemas(): String? =
-    when {
-        this == null -> null
-        this.isEmpty() -> null
-        else -> this.toString()
-    } вообщем проблема что в fraudManager поподает запись у которой нет executor а для нового процесса оно нужно чтоб редактировать фрод признаки мы его получаем в переменную focusMonitpring давай перекладывать его теперь 
