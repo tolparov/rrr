@@ -1,129 +1,133 @@
-package ru.sber.poirot.dpa.process.interaction
+org.springframework.transaction.CannotCreateTransactionException: Could not open JDBC Connection for transaction
+	at org.springframework.jdbc.datasource.DataSourceTransactionManager.doBegin(DataSourceTransactionManager.java:313) ~[spring-jdbc-6.2.7.jar:6.2.7]
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.startTransaction(AbstractPlatformTransactionManager.java:532) ~[spring-tx-6.2.7.jar:6.2.7]
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.getTransaction(AbstractPlatformTransactionManager.java:405) ~[spring-tx-6.2.7.jar:6.2.7]
+	at org.springframework.test.context.transaction.TransactionContext.startTransaction(TransactionContext.java:103) ~[spring-test-6.2.7.jar:6.2.7]
+	at org.springframework.test.context.transaction.TransactionalTestExecutionListener.beforeTestMethod(TransactionalTestExecutionListener.java:248) ~[spring-test-6.2.7.jar:6.2.7]
+	at org.springframework.test.context.TestContextManager.beforeTestMethod(TestContextManager.java:320) ~[spring-test-6.2.7.jar:6.2.7]
+	at org.springframework.test.context.junit.jupiter.SpringExtension.beforeEach(SpringExtension.java:236) ~[spring-test-6.2.7.jar:6.2.7]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeBeforeEachCallbacks$3(TestMethodTestDescriptor.java:166) ~[junit-jupiter-engine-5.11.4.jar:5.11.4]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeBeforeMethodsOrCallbacksUntilExceptionOccurs$7(TestMethodTestDescriptor.java:202) ~[junit-jupiter-engine-5.11.4.jar:5.11.4]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeBeforeMethodsOrCallbacksUntilExceptionOccurs(TestMethodTestDescriptor.java:202) ~[junit-jupiter-engine-5.11.4.jar:5.11.4]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeBeforeEachCallbacks(TestMethodTestDescriptor.java:165) ~[junit-jupiter-engine-5.11.4.jar:5.11.4]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:132) ~[junit-jupiter-engine-5.11.4.jar:5.11.4]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:68) ~[junit-jupiter-engine-5.11.4.jar:5.11.4]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:156) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54) ~[junit-platform-engine-1.11.4.jar:1.11.4]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198) ~[junit-platform-launcher-1.11.4.jar:1.11.4]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169) ~[junit-platform-launcher-1.11.4.jar:1.11.4]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93) ~[junit-platform-launcher-1.11.4.jar:1.11.4]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58) ~[junit-platform-launcher-1.11.4.jar:1.11.4]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141) ~[junit-platform-launcher-1.11.4.jar:1.11.4]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57) ~[junit-platform-launcher-1.11.4.jar:1.11.4]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103) ~[junit-platform-launcher-1.11.4.jar:1.11.4]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85) ~[junit-platform-launcher-1.11.4.jar:1.11.4]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47) ~[junit-platform-launcher-1.11.4.jar:1.11.4]
+	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.processAllTestClasses(JUnitPlatformTestClassProcessor.java:119) ~[na:na]
+	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.access$000(JUnitPlatformTestClassProcessor.java:94) ~[na:na]
+	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor.stop(JUnitPlatformTestClassProcessor.java:89) ~[na:na]
+	at org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.stop(SuiteTestClassProcessor.java:62) ~[na:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[na:na]
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569) ~[na:na]
+	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:36) ~[na:na]
+	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24) ~[na:na]
+	at org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch(ContextClassLoaderDispatch.java:33) ~[na:na]
+	at org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke(ProxyDispatchAdapter.java:94) ~[na:na]
+	at jdk.proxy2/jdk.proxy2.$Proxy5.stop(Unknown Source) ~[na:na]
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker$3.run(TestWorker.java:193) ~[na:na]
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName(TestWorker.java:129) ~[na:na]
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:100) ~[na:na]
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:60) ~[na:na]
+	at org.gradle.process.internal.worker.child.ActionExecutionWorker.execute(ActionExecutionWorker.java:56) ~[na:na]
+	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:119) ~[na:na]
+	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:66) ~[na:na]
+	at worker.org.gradle.process.internal.worker.GradleWorkerMain.run(GradleWorkerMain.java:69) ~[gradle-worker.jar:na]
+	at worker.org.gradle.process.internal.worker.GradleWorkerMain.main(GradleWorkerMain.java:74) ~[gradle-worker.jar:na]
+Caused by: io.zonky.test.db.shaded.com.google.common.util.concurrent.UncheckedExecutionException: io.zonky.test.db.provider.ProviderException: Unexpected error when preparing a database cluster
+	at io.zonky.test.db.shaded.com.google.common.util.concurrent.Futures.wrapAndThrowUnchecked(Futures.java:1546) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at io.zonky.test.db.shaded.com.google.common.util.concurrent.Futures.getUnchecked(Futures.java:1532) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at io.zonky.test.db.context.DefaultDatabaseContext.awaitDatabase(DefaultDatabaseContext.java:282) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at io.zonky.test.db.context.DefaultDatabaseContext.getDatabase(DefaultDatabaseContext.java:123) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at io.zonky.test.db.context.DatabaseTargetSource.getTarget(DatabaseTargetSource.java:32) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at org.springframework.aop.framework.JdkDynamicAopProxy.invoke(JdkDynamicAopProxy.java:203) ~[spring-aop-6.2.7.jar:6.2.7]
+	at jdk.proxy3/jdk.proxy3.$Proxy96.getConnection(Unknown Source) ~[na:na]
+	at org.springframework.jdbc.datasource.DataSourceTransactionManager.doBegin(DataSourceTransactionManager.java:269) ~[spring-jdbc-6.2.7.jar:6.2.7]
+	... 75 common frames omitted
+Caused by: io.zonky.test.db.provider.ProviderException: Unexpected error when preparing a database cluster
+	at io.zonky.test.db.provider.postgres.ZonkyPostgresDatabaseProvider.createDatabase(ZonkyPostgresDatabaseProvider.java:110) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at io.zonky.test.db.provider.postgres.ZonkyPostgresDatabaseProvider.createTemplate(ZonkyPostgresDatabaseProvider.java:95) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at io.zonky.test.db.provider.common.TemplatingDatabaseProvider.createTemplate(TemplatingDatabaseProvider.java:129) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at io.zonky.test.db.provider.common.TemplatingDatabaseProvider.lambda$createTemplateIfPossible$1(TemplatingDatabaseProvider.java:171) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at io.zonky.test.db.provider.common.TemplatingDatabaseProvider$TemplateWrapper.loadTemplate(TemplatingDatabaseProvider.java:294) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at io.zonky.test.db.provider.common.TemplatingDatabaseProvider$TemplateWrapper.access$200(TemplatingDatabaseProvider.java:224) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at io.zonky.test.db.provider.common.TemplatingDatabaseProvider.createTemplateIfPossible(TemplatingDatabaseProvider.java:171) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at io.zonky.test.db.provider.common.TemplatingDatabaseProvider.createDatabase(TemplatingDatabaseProvider.java:112) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at io.zonky.test.db.provider.common.TemplatingDatabaseProvider.createDatabase(TemplatingDatabaseProvider.java:104) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at io.zonky.test.db.provider.common.PrefetchingDatabaseProvider$PrefetchingTask.lambda$forPreparer$0(PrefetchingDatabaseProvider.java:391) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264) ~[na:na]
+	at io.zonky.test.db.provider.common.PrefetchingDatabaseProvider$PrefetchingTask.run(PrefetchingDatabaseProvider.java:420) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) ~[na:na]
+	at java.base/java.lang.Thread.run(Thread.java:840) ~[na:na]
+Caused by: java.lang.RuntimeException: java.io.IOException: Cannot run program "/tmp/embedded-pg/PG-75b6901d5d15251fa60b35e3a8237e39/bin/initdb": error=1, Операция не позволена
+	at io.zonky.test.db.postgres.embedded.EmbeddedPostgres.system(EmbeddedPostgres.java:638) ~[embedded-postgres-2.1.0.jar:na]
+	at io.zonky.test.db.postgres.embedded.EmbeddedPostgres.initdb(EmbeddedPostgres.java:250) ~[embedded-postgres-2.1.0.jar:na]
+	at io.zonky.test.db.postgres.embedded.EmbeddedPostgres.<init>(EmbeddedPostgres.java:157) ~[embedded-postgres-2.1.0.jar:na]
+	at io.zonky.test.db.postgres.embedded.EmbeddedPostgres$Builder.start(EmbeddedPostgres.java:584) ~[embedded-postgres-2.1.0.jar:na]
+	at io.zonky.test.db.provider.postgres.ZonkyPostgresDatabaseProvider$DatabaseInstance.<init>(ZonkyPostgresDatabaseProvider.java:139) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at io.zonky.test.db.provider.postgres.ZonkyPostgresDatabaseProvider$DatabaseInstance.<init>(ZonkyPostgresDatabaseProvider.java:130) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at io.zonky.test.db.provider.postgres.ZonkyPostgresDatabaseProvider$1.load(ZonkyPostgresDatabaseProvider.java:74) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at io.zonky.test.db.provider.postgres.ZonkyPostgresDatabaseProvider$1.load(ZonkyPostgresDatabaseProvider.java:72) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at io.zonky.test.db.shaded.com.google.common.cache.LocalCache$LoadingValueReference.loadFuture(LocalCache.java:3524) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at io.zonky.test.db.shaded.com.google.common.cache.LocalCache$Segment.loadSync(LocalCache.java:2273) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at io.zonky.test.db.shaded.com.google.common.cache.LocalCache$Segment.lockedGetOrLoad(LocalCache.java:2156) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at io.zonky.test.db.shaded.com.google.common.cache.LocalCache$Segment.get(LocalCache.java:2046) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at io.zonky.test.db.shaded.com.google.common.cache.LocalCache.get(LocalCache.java:3943) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at io.zonky.test.db.shaded.com.google.common.cache.LocalCache.getOrLoad(LocalCache.java:3967) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at io.zonky.test.db.shaded.com.google.common.cache.LocalCache$LocalLoadingCache.get(LocalCache.java:4952) ~[embedded-database-spring-test-2.6.0.jar:na]
+	at io.zonky.test.db.provider.postgres.ZonkyPostgresDatabaseProvider.createDatabase(ZonkyPostgresDatabaseProvider.java:106) ~[embedded-database-spring-test-2.6.0.jar:na]
+	... 14 common frames omitted
+Caused by: java.io.IOException: Cannot run program "/tmp/embedded-pg/PG-75b6901d5d15251fa60b35e3a8237e39/bin/initdb": error=1, Операция не позволена
+	at java.base/java.lang.ProcessBuilder.start(ProcessBuilder.java:1143) ~[na:na]
+	at java.base/java.lang.ProcessBuilder.start(ProcessBuilder.java:1073) ~[na:na]
+	at io.zonky.test.db.postgres.embedded.EmbeddedPostgres.system(EmbeddedPostgres.java:627) ~[embedded-postgres-2.1.0.jar:na]
+	... 29 common frames omitted
+Caused by: java.io.IOException: error=1, Операция не позволена
+	at java.base/java.lang.ProcessImpl.forkAndExec(Native Method) ~[na:na]
+	at java.base/java.lang.ProcessImpl.<init>(ProcessImpl.java:314) ~[na:na]
+	at java.base/java.lang.ProcessImpl.start(ProcessImpl.java:244) ~[na:na]
+	at java.base/java.lang.ProcessBuilder.start(ProcessBuilder.java:1110) ~[na:na]
+	... 31 common frames omitted
 
-import org.springframework.stereotype.Service
-import ru.sber.poirot.dpa.model.ProcessType
-import ru.sber.poirot.dpa.model.dictionaries.ProcessTaskStatus
-import ru.sber.poirot.dpa.model.dictionaries.ProcessTaskStatus.*
-import ru.sber.poirot.dpa.model.rqrs.*
-import ru.sber.poirot.dpa.model.rqrs.DpaRequestWrapper.Companion.wrap
-import ru.sber.poirot.dpa.model.rqrs.DpaSyncResponse.Companion.DUMMY_SUCCESS_RESPONSE
-import ru.sber.poirot.dpa.process.OperationInfoProvider.operationInfo
-import ru.sber.poirot.dpa.trace.Trace
-import ru.sber.poirot.dpa.trace.TraceDao
-import ru.sber.poirot.dpa.trace.traceRecord
-import ru.sber.utils.generateRqUId
-import ru.sber.utils.logger
-
-@Service
-class ProcessRequestManager(
-    private val sender: ProcessDpSender,
-    private val traceDao: TraceDao
-) {
-    private val log = logger()
-
-    companion object {
-        private const val ABORTION_MESSAGE: String =
-            "Interaction with DIS aborted: couldn't find any non-aborted trace" +
-                    " taskId={}, processType={}, processTaskStatus={}"
-    }
-
-    suspend fun requestExecutor(request: DpaExecutorRequest): DpaSyncResponse =
-        request.manageRq(
-            WAITING_ASSIGNED_EXECUTOR,
-            { operId: String? -> operId ?: generateRqUId() }
-        ) { rq -> sender.requestExecutor(rq) }
-
-    suspend fun reassignExecutor(request: DpaReassignRequest): DpaSyncResponse =
-        request.manageRq(WAITING_REASSIGNED_EXECUTOR) { rq -> sender.reassignExecutor(rq) }
-
-    suspend fun notify(request: DpaNotifyRequest): DpaSyncResponse = with(request) {
-        manageRq(processTaskStatus) { rq -> sender.notify(rq) }
-    }
-
-    suspend fun changeSla(request: DpaChangeSlaRequest): DpaSyncResponse =
-        request.manageRq(WAITING_CHANGED_SLA) { rq -> sender.changeSla(rq) }
-
-    private suspend fun <T : DpaRequest> T.manageRq(
-        status: ProcessTaskStatus,
-        operIdFetcher: DpaRequest.(String?) -> String = { operId -> operIdOrException(operId) },
-        action: suspend (DpaRequestWrapper<T>) -> DpaSyncResponse
-    ): DpaSyncResponse = operInfo().let { (operId, abortInteraction) ->
-        makeRq(operIdFetcher(operId), abortInteraction, status) { rq -> action(rq) }
-    }
-
-    private fun DpaRequest.operIdOrException(operId: String?): String =
-        operId ?: throw IllegalStateException(
-            "Should never happen: no operId for notify task=$taskId," +
-                    " processType=$processType"
-        )
-
-    private suspend fun DpaRequest.operInfo(): Pair<String?, Boolean> =
-        operationInfo().let { info -> info.operId to info.abortInteraction }
-
-    private suspend fun <T : DpaRequest> T.makeRq(
-        operId: String,
-        abortInteraction: Boolean,
-        status: ProcessTaskStatus,
-        action: suspend (DpaRequestWrapper<T>) -> DpaSyncResponse
-    ): DpaSyncResponse = when {
-        abortInteraction -> spotWithAbortion(operId, processType, status)
-        else -> action(wrap(operId, status))
-    }
-
-    private suspend fun DpaRequest.spotWithAbortion(
-        operId: String,
-        processType: ProcessType,
-        processTaskStatus: ProcessTaskStatus,
-    ): DpaSyncResponse {
-        log.warn(ABORTION_MESSAGE, taskId, processType, processTaskStatus)
-
-        trace(operId, processTaskStatus, true)
-            .traceRecord()
-            .also { traceDao.merge(it) }
-
-        return DUMMY_SUCCESS_RESPONSE
-    }
-
-    private suspend fun trace(
-        operId: String,
-        processTaskStatus: ProcessTaskStatus,
-        abortInteraction: Boolean
-    ): Trace = traceDao.findByOperId(operId)!!.copy(
-        processTaskStatus = processTaskStatus.name,
-        abortInteraction = abortInteraction
-    )
-}package ru.sber.poirot.dpa.process.interaction
-
-import jakarta.validation.Valid
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
-import ru.sber.poirot.dpa.model.rqrs.*
-
-@RestController
-@RequestMapping("/internal/process")
-class PoirotProcessController(private val manager: ProcessRequestManager) {
-
-    @PostMapping("/requestExecutor")
-    suspend fun requestExecutor(@RequestBody request: DpaExecutorRequest): DpaSyncResponse =
-        manager.requestExecutor(request)
-
-    @PostMapping("/notify/**")
-    suspend fun notify(@RequestBody request: DpaNotifyRequest): DpaSyncResponse =
-        manager.notify(request)
-
-    @PostMapping("/reassignExecutor")
-    suspend fun reassignExecutor(
-        @RequestBody
-        @Valid
-        request: DpaReassignRequest
-    ): DpaSyncResponse = manager.reassignExecutor(request)
-
-    @PostMapping("/changeSla")
-    suspend fun changeSla(
-        @RequestBody
-        @Valid
-        request: DpaChangeSlaRequest
-    ): DpaSyncResponse = manager.changeSla(request)
-}
