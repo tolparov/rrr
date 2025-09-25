@@ -1,133 +1,229 @@
-org.springframework.transaction.CannotCreateTransactionException: Could not open JDBC Connection for transaction
-	at org.springframework.jdbc.datasource.DataSourceTransactionManager.doBegin(DataSourceTransactionManager.java:313) ~[spring-jdbc-6.2.7.jar:6.2.7]
-	at org.springframework.transaction.support.AbstractPlatformTransactionManager.startTransaction(AbstractPlatformTransactionManager.java:532) ~[spring-tx-6.2.7.jar:6.2.7]
-	at org.springframework.transaction.support.AbstractPlatformTransactionManager.getTransaction(AbstractPlatformTransactionManager.java:405) ~[spring-tx-6.2.7.jar:6.2.7]
-	at org.springframework.test.context.transaction.TransactionContext.startTransaction(TransactionContext.java:103) ~[spring-test-6.2.7.jar:6.2.7]
-	at org.springframework.test.context.transaction.TransactionalTestExecutionListener.beforeTestMethod(TransactionalTestExecutionListener.java:248) ~[spring-test-6.2.7.jar:6.2.7]
-	at org.springframework.test.context.TestContextManager.beforeTestMethod(TestContextManager.java:320) ~[spring-test-6.2.7.jar:6.2.7]
-	at org.springframework.test.context.junit.jupiter.SpringExtension.beforeEach(SpringExtension.java:236) ~[spring-test-6.2.7.jar:6.2.7]
-	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeBeforeEachCallbacks$3(TestMethodTestDescriptor.java:166) ~[junit-jupiter-engine-5.11.4.jar:5.11.4]
-	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeBeforeMethodsOrCallbacksUntilExceptionOccurs$7(TestMethodTestDescriptor.java:202) ~[junit-jupiter-engine-5.11.4.jar:5.11.4]
-	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeBeforeMethodsOrCallbacksUntilExceptionOccurs(TestMethodTestDescriptor.java:202) ~[junit-jupiter-engine-5.11.4.jar:5.11.4]
-	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeBeforeEachCallbacks(TestMethodTestDescriptor.java:165) ~[junit-jupiter-engine-5.11.4.jar:5.11.4]
-	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:132) ~[junit-jupiter-engine-5.11.4.jar:5.11.4]
-	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:68) ~[junit-jupiter-engine-5.11.4.jar:5.11.4]
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:156) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511) ~[na:na]
-	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511) ~[na:na]
-	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54) ~[junit-platform-engine-1.11.4.jar:1.11.4]
-	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198) ~[junit-platform-launcher-1.11.4.jar:1.11.4]
-	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169) ~[junit-platform-launcher-1.11.4.jar:1.11.4]
-	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93) ~[junit-platform-launcher-1.11.4.jar:1.11.4]
-	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58) ~[junit-platform-launcher-1.11.4.jar:1.11.4]
-	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141) ~[junit-platform-launcher-1.11.4.jar:1.11.4]
-	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57) ~[junit-platform-launcher-1.11.4.jar:1.11.4]
-	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103) ~[junit-platform-launcher-1.11.4.jar:1.11.4]
-	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85) ~[junit-platform-launcher-1.11.4.jar:1.11.4]
-	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47) ~[junit-platform-launcher-1.11.4.jar:1.11.4]
-	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.processAllTestClasses(JUnitPlatformTestClassProcessor.java:119) ~[na:na]
-	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.access$000(JUnitPlatformTestClassProcessor.java:94) ~[na:na]
-	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor.stop(JUnitPlatformTestClassProcessor.java:89) ~[na:na]
-	at org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.stop(SuiteTestClassProcessor.java:62) ~[na:na]
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[na:na]
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569) ~[na:na]
-	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:36) ~[na:na]
-	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24) ~[na:na]
-	at org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch(ContextClassLoaderDispatch.java:33) ~[na:na]
-	at org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke(ProxyDispatchAdapter.java:94) ~[na:na]
-	at jdk.proxy2/jdk.proxy2.$Proxy5.stop(Unknown Source) ~[na:na]
-	at org.gradle.api.internal.tasks.testing.worker.TestWorker$3.run(TestWorker.java:193) ~[na:na]
-	at org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName(TestWorker.java:129) ~[na:na]
-	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:100) ~[na:na]
-	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:60) ~[na:na]
-	at org.gradle.process.internal.worker.child.ActionExecutionWorker.execute(ActionExecutionWorker.java:56) ~[na:na]
-	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:119) ~[na:na]
-	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:66) ~[na:na]
-	at worker.org.gradle.process.internal.worker.GradleWorkerMain.run(GradleWorkerMain.java:69) ~[gradle-worker.jar:na]
-	at worker.org.gradle.process.internal.worker.GradleWorkerMain.main(GradleWorkerMain.java:74) ~[gradle-worker.jar:na]
-Caused by: io.zonky.test.db.shaded.com.google.common.util.concurrent.UncheckedExecutionException: io.zonky.test.db.provider.ProviderException: Unexpected error when preparing a database cluster
-	at io.zonky.test.db.shaded.com.google.common.util.concurrent.Futures.wrapAndThrowUnchecked(Futures.java:1546) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at io.zonky.test.db.shaded.com.google.common.util.concurrent.Futures.getUnchecked(Futures.java:1532) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at io.zonky.test.db.context.DefaultDatabaseContext.awaitDatabase(DefaultDatabaseContext.java:282) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at io.zonky.test.db.context.DefaultDatabaseContext.getDatabase(DefaultDatabaseContext.java:123) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at io.zonky.test.db.context.DatabaseTargetSource.getTarget(DatabaseTargetSource.java:32) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at org.springframework.aop.framework.JdkDynamicAopProxy.invoke(JdkDynamicAopProxy.java:203) ~[spring-aop-6.2.7.jar:6.2.7]
-	at jdk.proxy3/jdk.proxy3.$Proxy96.getConnection(Unknown Source) ~[na:na]
-	at org.springframework.jdbc.datasource.DataSourceTransactionManager.doBegin(DataSourceTransactionManager.java:269) ~[spring-jdbc-6.2.7.jar:6.2.7]
-	... 75 common frames omitted
-Caused by: io.zonky.test.db.provider.ProviderException: Unexpected error when preparing a database cluster
-	at io.zonky.test.db.provider.postgres.ZonkyPostgresDatabaseProvider.createDatabase(ZonkyPostgresDatabaseProvider.java:110) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at io.zonky.test.db.provider.postgres.ZonkyPostgresDatabaseProvider.createTemplate(ZonkyPostgresDatabaseProvider.java:95) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at io.zonky.test.db.provider.common.TemplatingDatabaseProvider.createTemplate(TemplatingDatabaseProvider.java:129) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at io.zonky.test.db.provider.common.TemplatingDatabaseProvider.lambda$createTemplateIfPossible$1(TemplatingDatabaseProvider.java:171) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at io.zonky.test.db.provider.common.TemplatingDatabaseProvider$TemplateWrapper.loadTemplate(TemplatingDatabaseProvider.java:294) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at io.zonky.test.db.provider.common.TemplatingDatabaseProvider$TemplateWrapper.access$200(TemplatingDatabaseProvider.java:224) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at io.zonky.test.db.provider.common.TemplatingDatabaseProvider.createTemplateIfPossible(TemplatingDatabaseProvider.java:171) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at io.zonky.test.db.provider.common.TemplatingDatabaseProvider.createDatabase(TemplatingDatabaseProvider.java:112) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at io.zonky.test.db.provider.common.TemplatingDatabaseProvider.createDatabase(TemplatingDatabaseProvider.java:104) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at io.zonky.test.db.provider.common.PrefetchingDatabaseProvider$PrefetchingTask.lambda$forPreparer$0(PrefetchingDatabaseProvider.java:391) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264) ~[na:na]
-	at io.zonky.test.db.provider.common.PrefetchingDatabaseProvider$PrefetchingTask.run(PrefetchingDatabaseProvider.java:420) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) ~[na:na]
-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) ~[na:na]
-	at java.base/java.lang.Thread.run(Thread.java:840) ~[na:na]
-Caused by: java.lang.RuntimeException: java.io.IOException: Cannot run program "/tmp/embedded-pg/PG-75b6901d5d15251fa60b35e3a8237e39/bin/initdb": error=1, Операция не позволена
-	at io.zonky.test.db.postgres.embedded.EmbeddedPostgres.system(EmbeddedPostgres.java:638) ~[embedded-postgres-2.1.0.jar:na]
-	at io.zonky.test.db.postgres.embedded.EmbeddedPostgres.initdb(EmbeddedPostgres.java:250) ~[embedded-postgres-2.1.0.jar:na]
-	at io.zonky.test.db.postgres.embedded.EmbeddedPostgres.<init>(EmbeddedPostgres.java:157) ~[embedded-postgres-2.1.0.jar:na]
-	at io.zonky.test.db.postgres.embedded.EmbeddedPostgres$Builder.start(EmbeddedPostgres.java:584) ~[embedded-postgres-2.1.0.jar:na]
-	at io.zonky.test.db.provider.postgres.ZonkyPostgresDatabaseProvider$DatabaseInstance.<init>(ZonkyPostgresDatabaseProvider.java:139) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at io.zonky.test.db.provider.postgres.ZonkyPostgresDatabaseProvider$DatabaseInstance.<init>(ZonkyPostgresDatabaseProvider.java:130) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at io.zonky.test.db.provider.postgres.ZonkyPostgresDatabaseProvider$1.load(ZonkyPostgresDatabaseProvider.java:74) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at io.zonky.test.db.provider.postgres.ZonkyPostgresDatabaseProvider$1.load(ZonkyPostgresDatabaseProvider.java:72) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at io.zonky.test.db.shaded.com.google.common.cache.LocalCache$LoadingValueReference.loadFuture(LocalCache.java:3524) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at io.zonky.test.db.shaded.com.google.common.cache.LocalCache$Segment.loadSync(LocalCache.java:2273) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at io.zonky.test.db.shaded.com.google.common.cache.LocalCache$Segment.lockedGetOrLoad(LocalCache.java:2156) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at io.zonky.test.db.shaded.com.google.common.cache.LocalCache$Segment.get(LocalCache.java:2046) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at io.zonky.test.db.shaded.com.google.common.cache.LocalCache.get(LocalCache.java:3943) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at io.zonky.test.db.shaded.com.google.common.cache.LocalCache.getOrLoad(LocalCache.java:3967) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at io.zonky.test.db.shaded.com.google.common.cache.LocalCache$LocalLoadingCache.get(LocalCache.java:4952) ~[embedded-database-spring-test-2.6.0.jar:na]
-	at io.zonky.test.db.provider.postgres.ZonkyPostgresDatabaseProvider.createDatabase(ZonkyPostgresDatabaseProvider.java:106) ~[embedded-database-spring-test-2.6.0.jar:na]
-	... 14 common frames omitted
-Caused by: java.io.IOException: Cannot run program "/tmp/embedded-pg/PG-75b6901d5d15251fa60b35e3a8237e39/bin/initdb": error=1, Операция не позволена
-	at java.base/java.lang.ProcessBuilder.start(ProcessBuilder.java:1143) ~[na:na]
-	at java.base/java.lang.ProcessBuilder.start(ProcessBuilder.java:1073) ~[na:na]
-	at io.zonky.test.db.postgres.embedded.EmbeddedPostgres.system(EmbeddedPostgres.java:627) ~[embedded-postgres-2.1.0.jar:na]
-	... 29 common frames omitted
-Caused by: java.io.IOException: error=1, Операция не позволена
-	at java.base/java.lang.ProcessImpl.forkAndExec(Native Method) ~[na:na]
-	at java.base/java.lang.ProcessImpl.<init>(ProcessImpl.java:314) ~[na:na]
-	at java.base/java.lang.ProcessImpl.start(ProcessImpl.java:244) ~[na:na]
-	at java.base/java.lang.ProcessBuilder.start(ProcessBuilder.java:1110) ~[na:na]
-	... 31 common frames omitted
+Multiple Failures (1 failure)
+	java.lang.AssertionError: 
+Expecting actual:
+  []
+to be equal to:
+  [BasketRecord(type=type1, sla=Sla(initialDeadline=2024-01-01T01:01, prolongedDeadline=null, prolongationReason=null), record=UnifiedRecord(date=2024-01-01T01:01, name=name1, appId=appId1, inn=inn1, status=status1, id=id1, metadata=null, sla=null)),
+    BasketRecord(type=type2, sla=Sla(initialDeadline=2024-01-01T01:01, prolongedDeadline=2024-01-01T01:02, prolongationReason=reason2), record=UnifiedRecord(date=2024-01-01T01:01, name=name2, appId=appId2, inn=inn2, status=status2, id=id2, metadata=null, sla=null))]
+when recursively comparing field by field, but found the following difference:
 
+Top level actual and expected objects differ:
+- actual value  : []
+- expected value: [BasketRecord(type=type1, sla=Sla(initialDeadline=2024-01-01T01:01, prolongedDeadline=null, prolongationReason=null), record=UnifiedRecord(date=2024-01-01T01:01, name=name1, appId=appId1, inn=inn1, status=status1, id=id1, metadata=null, sla=null)),
+    BasketRecord(type=type2, sla=Sla(initialDeadline=2024-01-01T01:01, prolongedDeadline=2024-01-01T01:02, prolongationReason=reason2), record=UnifiedRecord(date=2024-01-01T01:01, name=name2, appId=appId2, inn=inn2, status=status2, id=id2, metadata=null, sla=null))]
+actual and expected values are collections of different size, actual size=0 when expected size=2
+
+The recursive comparison was performed with this configuration:
+- no equals methods were used in the comparison EXCEPT for java JDK types since introspecting JDK types is forbidden in java 17+ (use withEqualsForType to register a specific way to compare a JDK type if you need it)
+- these types were compared with the following comparators:
+  - java.lang.Double -> DoubleComparator[precision=1.0E-15]
+  - java.lang.Float -> FloatComparator[precision=1.0E-6]
+  - java.nio.file.Path -> lexicographic comparator (Path natural order)
+- actual and expected objects and their fields were compared field by field recursively even if they were not of the same type, this allows for example to compare a Person to a PersonDto (call strictTypeChecking(true) to change that behavior).
+- the introspection strategy used was: DefaultRecursiveComparisonIntrospectionStrategy
+
+org.opentest4j.MultipleFailuresError: Multiple Failures (1 failure)
+	java.lang.AssertionError: 
+Expecting actual:
+  []
+to be equal to:
+  [BasketRecord(type=type1, sla=Sla(initialDeadline=2024-01-01T01:01, prolongedDeadline=null, prolongationReason=null), record=UnifiedRecord(date=2024-01-01T01:01, name=name1, appId=appId1, inn=inn1, status=status1, id=id1, metadata=null, sla=null)),
+    BasketRecord(type=type2, sla=Sla(initialDeadline=2024-01-01T01:01, prolongedDeadline=2024-01-01T01:02, prolongationReason=reason2), record=UnifiedRecord(date=2024-01-01T01:01, name=name2, appId=appId2, inn=inn2, status=status2, id=id2, metadata=null, sla=null))]
+when recursively comparing field by field, but found the following difference:
+
+Top level actual and expected objects differ:
+- actual value  : []
+- expected value: [BasketRecord(type=type1, sla=Sla(initialDeadline=2024-01-01T01:01, prolongedDeadline=null, prolongationReason=null), record=UnifiedRecord(date=2024-01-01T01:01, name=name1, appId=appId1, inn=inn1, status=status1, id=id1, metadata=null, sla=null)),
+    BasketRecord(type=type2, sla=Sla(initialDeadline=2024-01-01T01:01, prolongedDeadline=2024-01-01T01:02, prolongationReason=reason2), record=UnifiedRecord(date=2024-01-01T01:01, name=name2, appId=appId2, inn=inn2, status=status2, id=id2, metadata=null, sla=null))]
+actual and expected values are collections of different size, actual size=0 when expected size=2
+
+The recursive comparison was performed with this configuration:
+- no equals methods were used in the comparison EXCEPT for java JDK types since introspecting JDK types is forbidden in java 17+ (use withEqualsForType to register a specific way to compare a JDK type if you need it)
+- these types were compared with the following comparators:
+  - java.lang.Double -> DoubleComparator[precision=1.0E-15]
+  - java.lang.Float -> FloatComparator[precision=1.0E-6]
+  - java.nio.file.Path -> lexicographic comparator (Path natural order)
+- actual and expected objects and their fields were compared field by field recursively even if they were not of the same type, this allows for example to compare a Person to a PersonDto (call strictTypeChecking(true) to change that behavior).
+- the introspection strategy used was: DefaultRecursiveComparisonIntrospectionStrategy
+
+	at org.junit.jupiter.api.AssertAll.assertAll(AssertAll.java:80)
+	at org.junit.jupiter.api.AssertAll.assertAll(AssertAll.java:58)
+	at org.junit.jupiter.api.Assertions.assertAll(Assertions.java:3012)
+	at org.junit.jupiter.api.AssertionsKt.assertAll(Assertions.kt:53)
+	at org.junit.jupiter.api.AssertionsKt.assertAll(Assertions.kt:86)
+	at ru.sber.poirot.basket.api.impl.UnifiedBasketImplTest$load records$1.invokeSuspend(UnifiedBasketImplTest.kt:81)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+	at kotlinx.coroutines.internal.ScopeCoroutine.afterResume(Scopes.kt:28)
+	at kotlinx.coroutines.AbstractCoroutine.resumeWith(AbstractCoroutine.kt:99)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:46)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:104)
+	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:277)
+	at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:95)
+	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:69)
+	at kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source)
+	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:48)
+	at kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source)
+	at ru.sber.poirot.basket.api.impl.UnifiedBasketImplTest.load records(UnifiedBasketImplTest.kt:71)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	Suppressed: java.lang.AssertionError: 
+Expecting actual:
+  []
+to be equal to:
+  [BasketRecord(type=type1, sla=Sla(initialDeadline=2024-01-01T01:01, prolongedDeadline=null, prolongationReason=null), record=UnifiedRecord(date=2024-01-01T01:01, name=name1, appId=appId1, inn=inn1, status=status1, id=id1, metadata=null, sla=null)),
+    BasketRecord(type=type2, sla=Sla(initialDeadline=2024-01-01T01:01, prolongedDeadline=2024-01-01T01:02, prolongationReason=reason2), record=UnifiedRecord(date=2024-01-01T01:01, name=name2, appId=appId2, inn=inn2, status=status2, id=id2, metadata=null, sla=null))]
+when recursively comparing field by field, but found the following difference:
+
+Top level actual and expected objects differ:
+- actual value  : []
+- expected value: [BasketRecord(type=type1, sla=Sla(initialDeadline=2024-01-01T01:01, prolongedDeadline=null, prolongationReason=null), record=UnifiedRecord(date=2024-01-01T01:01, name=name1, appId=appId1, inn=inn1, status=status1, id=id1, metadata=null, sla=null)),
+    BasketRecord(type=type2, sla=Sla(initialDeadline=2024-01-01T01:01, prolongedDeadline=2024-01-01T01:02, prolongationReason=reason2), record=UnifiedRecord(date=2024-01-01T01:01, name=name2, appId=appId2, inn=inn2, status=status2, id=id2, metadata=null, sla=null))]
+actual and expected values are collections of different size, actual size=0 when expected size=2
+
+The recursive comparison was performed with this configuration:
+- no equals methods were used in the comparison EXCEPT for java JDK types since introspecting JDK types is forbidden in java 17+ (use withEqualsForType to register a specific way to compare a JDK type if you need it)
+- these types were compared with the following comparators:
+  - java.lang.Double -> DoubleComparator[precision=1.0E-15]
+  - java.lang.Float -> FloatComparator[precision=1.0E-6]
+  - java.nio.file.Path -> lexicographic comparator (Path natural order)
+- actual and expected objects and their fields were compared field by field recursively even if they were not of the same type, this allows for example to compare a Person to a PersonDto (call strictTypeChecking(true) to change that behavior).
+- the introspection strategy used was: DefaultRecursiveComparisonIntrospectionStrategy
+
+		at ru.sber.poirot.basket.api.impl.UnifiedBasketImplTest$load records$1$1.invoke(UnifiedBasketImplTest.kt:82)
+		at ru.sber.poirot.basket.api.impl.UnifiedBasketImplTest$load records$1$1.invoke(UnifiedBasketImplTest.kt:81)
+		at org.junit.jupiter.api.AssertionsKt$convert$1.invoke$lambda$0(Assertions.kt:48)
+		at org.junit.jupiter.api.AssertAll.lambda$assertAll$0(AssertAll.java:68)
+		at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197)
+		at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197)
+		at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1625)
+		at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509)
+		at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
+		at java.base/java.util.stream.ReduceOps$ReduceOp.evaluateSequential(ReduceOps.java:921)
+		at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
+		at java.base/java.util.stream.ReferencePipeline.collect(ReferencePipeline.java:682)
+		at org.junit.jupiter.api.AssertAll.assertAll(AssertAll.java:77)
+		... 20 more
+package ru.sber.poirot.basket.api.impl
+
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertAll
+import ru.sber.poirot.allure.AllureAnnotation
+import ru.sber.poirot.basket.api.impl.ProcessType.DER
+import ru.sber.poirot.basket.api.impl.ProcessType.DEVIATION
+import ru.sber.poirot.basket.api.model.RecordsRequest
+import ru.sber.poirot.basket.common.BasketRecord
+import ru.sber.poirot.basket.common.SourceResponse
+import ru.sber.poirot.common.UnifiedRecord
+import java.time.LocalDate
+import java.time.LocalDateTime
+
+@AllureAnnotation
+internal class UnifiedBasketImplTest {
+    private val errorMessage = "Error Message"
+    private val records = listOf(
+        BasketRecord(
+            type = "type1",
+            sla = BasketRecord.Sla(
+                initialDeadline = LocalDateTime.of(2024, 1, 1, 1, 1),
+                prolongedDeadline = null,
+                prolongationReason = null,
+            ),
+            record = UnifiedRecord(
+                date = LocalDateTime.of(2024, 1, 1, 1, 1),
+                name = "name1",
+                appId = "appId1",
+                inn = "inn1",
+                status = "status1",
+                id = "id1",
+            )
+        ),
+        BasketRecord(
+            type = "type2",
+            sla = BasketRecord.Sla(
+                initialDeadline = LocalDateTime.of(2024, 1, 1, 1, 1),
+                prolongedDeadline = LocalDateTime.of(2024, 1, 1, 1, 2),
+                prolongationReason = "reason2",
+            ),
+            record = UnifiedRecord(
+                date = LocalDateTime.of(2024, 1, 1, 1, 1),
+                name = "name2",
+                appId = "appId2",
+                inn = "inn2",
+                status = "status2",
+                id = "id2",
+            )
+        ),
+    )
+
+    private val workingBasketLoader: BasketLoader = mockk {
+        every { type } returns DER
+        coEvery { getRecords(any()) } returns SourceResponse.success(records)
+    }
+    private val brokenBasketLoader: BasketLoader = mockk {
+        every { type } returns DEVIATION
+        coEvery { getRecords(any()) } returns SourceResponse.error(errorMessage)
+    }
+    private val unifiedBasketImpl = UnifiedBasketImpl(
+        basketLoaders = listOf(workingBasketLoader, brokenBasketLoader),
+    )
+
+    @Test
+    fun `load records`(): Unit = runBlocking {
+        // given
+        val request = RecordsRequest(
+            fromDate = LocalDate.of(2024, 1, 1),
+            toDate = LocalDate.of(2024, 1, 2),
+            filters = listOf()
+        )
+        // when
+        val response = unifiedBasketImpl.loadRecords(request)
+        // then
+        assertAll(
+            { assertThat(response.records).usingRecursiveComparison().isEqualTo(records) },
+            { assertThat(response.warningMessages).usingRecursiveComparison().isEqualTo(listOf(errorMessage)) },
+        )
+    }
+}package ru.sber.poirot.basket.api.impl.loaders
+
+import ru.sber.poirot.CurrentUser
+import ru.sber.poirot.basket.BasketProviderRequest
+import ru.sber.poirot.basket.api.impl.BasketLoader
+import ru.sber.poirot.basket.api.impl.ProcessType
+import ru.sber.poirot.basket.api.model.RecordsRequest
+import ru.sber.poirot.basket.common.SourceResponse
+import ru.sber.poirot.basket.common.sources.UnifiedSource
+import ru.sber.poirot.common.UnifiedRole
+
+class BasketLoaderImpl(
+    private val currentUser: CurrentUser,
+    private val roleMap: Map<String, UnifiedRole>,
+    private val unifiedSource: UnifiedSource,
+) : BasketLoader {
+    override val type: ProcessType = unifiedSource.type
+
+    override suspend fun getRecords(recordsRequest: RecordsRequest): SourceResponse {
+        val request = recordsRequest.withUserInfo()
+        return unifiedSource.fetch("/internal/basket/records", request)
+    }
+
+    private suspend fun RecordsRequest.withUserInfo(): BasketProviderRequest =
+        BasketProviderRequest(
+            fromDate = fromDate,
+            toDate = toDate,
+            roles = getRoles(),
+            userName = currentUser.userName(),
+        )
+
+    private suspend fun getRoles(): List<UnifiedRole> =
+        buildList {
+            roleMap.forEach { (key, value) ->
+                if (currentUser.hasPermission(key)) add(value)
+            }
+        }.distinct()
+}
